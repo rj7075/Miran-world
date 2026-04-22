@@ -1,41 +1,48 @@
-import { useState } from 'react'
-import './index.css'
+import { useState } from "react";
+import "./index.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    
+    if (!query.trim()) return;
 
-const res = await fetch(`${API_URL}/userquery`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ query })
-    });
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/userquery`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ query })
+      });
 
-    const data = await res.json();
-    setResult(data);
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
   };
 
   const scale = (val) => val * 50;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6">
       
       {/* Card */}
-      <div className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-xl">
+      <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 w-full max-w-2xl">
         
-        <h1 className="text-2xl font-bold text-center mb-4">
-           Drawing AI
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-4">
+          Drawing AI
         </h1>
 
         {/* Input */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -45,18 +52,20 @@ const res = await fetch(`${API_URL}/userquery`, {
 
           <button
             onClick={handleSubmit}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto"
           >
-            Submit
+            {loading ? "Loading..." : "Submit"}
           </button>
         </div>
 
         {/* Drawing Area */}
-        <div className="mt-6 border rounded-xl p-4 bg-gray-50 flex justify-center">
-          <svg width="300" height="300">
+        <div className="mt-6 border rounded-xl p-2 sm:p-4 bg-gray-50 flex justify-center overflow-x-auto">
+          <svg
+            viewBox="0 0 300 300"
+            className="w-full max-w-[300px] h-auto"
+          >
             {result?.shapes?.map((shape, i) => {
-              
-              // 🔺 Triangle
+
               if (shape.type === "triangle") {
                 const points = shape.points
                   .map(([x, y]) => `${scale(x)},${300 - scale(y)}`)
@@ -73,7 +82,6 @@ const res = await fetch(`${API_URL}/userquery`, {
                 );
               }
 
-              // ⚪ Circle
               if (shape.type === "circle") {
                 return (
                   <circle
@@ -95,8 +103,11 @@ const res = await fetch(`${API_URL}/userquery`, {
 
         {/* JSON Output */}
         <div className="mt-4">
-          <h3 className="font-semibold mb-2">Output JSON:</h3>
-          <pre className="bg-black text-green-400 p-3 rounded-lg text-sm overflow-x-auto">
+          <h3 className="font-semibold mb-2 text-sm sm:text-base">
+            Output JSON:
+          </h3>
+
+          <pre className="bg-black text-green-400 p-3 rounded-lg text-xs sm:text-sm overflow-x-auto max-h-60">
             {JSON.stringify(result, null, 2)}
           </pre>
         </div>
