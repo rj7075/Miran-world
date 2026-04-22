@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import './index.css'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
 
   const handleSubmit = async () => {
-    const res = await fetch("http://127.0.0.1:8000/userquery", {
+    
+
+const res = await fetch(`${API_URL}/userquery`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
